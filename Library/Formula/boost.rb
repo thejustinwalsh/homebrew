@@ -1,8 +1,8 @@
 class Boost < Formula
   desc "Collection of portable C++ source libraries"
   homepage "http://www.boost.org"
-  url "https://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.tar.bz2"
-  sha256 "fdfc204fc33ec79c99b9a74944c3e54bd78be4f7f15e260c0e2700a36dc7d3e5"
+  url "https://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.bz2"
+  sha256 "727a932322d94287b62abb1bd2d41723eec4356a7728909e38adb65ca25241ca"
 
   head "https://github.com/boostorg/boost.git"
 
@@ -22,12 +22,16 @@ class Boost < Formula
   option "without-static", "Disable building static library variant"
   option "with-mpi", "Build with MPI support"
   option :cxx11
+  option :cxx14
 
   deprecated_option "with-icu" => "with-icu4c"
 
   if build.cxx11?
     depends_on "icu4c" => [:optional, "c++11"]
     depends_on "open-mpi" => "c++11" if build.with? "mpi"
+  elsif build.cxx14?
+    depends_on "icu4c" => [:optional, "c++14"]
+    depends_on "open-mpi" => "c++14" if build.with? "mpi"
   else
     depends_on "icu4c" => :optional
     depends_on :mpi => [:cc, :cxx, :optional]
@@ -39,6 +43,7 @@ class Boost < Formula
   end
 
   needs :cxx11 if build.cxx11?
+  needs :cxx14 if build.cxx11?
 
   def install
     # https://svn.boost.org/trac/boost/ticket/8841
@@ -114,6 +119,11 @@ class Boost < Formula
     # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
     if build.cxx11?
       args << "cxxflags=-std=c++11"
+      if ENV.compiler == :clang
+        args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
+      end
+    elsif
+      args << "cxxflags=-std=c++14"
       if ENV.compiler == :clang
         args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
       end
