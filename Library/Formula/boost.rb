@@ -22,14 +22,10 @@ class Boost < Formula
   option "without-static", "Disable building static library variant"
   option "with-mpi", "Build with MPI support"
   option :cxx11
-  option :cxx14
 
   deprecated_option "with-icu" => "with-icu4c"
 
   if build.cxx11?
-    depends_on "icu4c" => [:optional, "c++11"]
-    depends_on "open-mpi" => "c++11" if build.with? "mpi"
-  elsif build.cxx14?
     depends_on "icu4c" => [:optional, "c++14"]
     depends_on "open-mpi" => "c++14" if build.with? "mpi"
   else
@@ -43,7 +39,6 @@ class Boost < Formula
   end
 
   needs :cxx11 if build.cxx11?
-  needs :cxx14 if build.cxx11?
 
   def install
     # https://svn.boost.org/trac/boost/ticket/8841
@@ -118,11 +113,6 @@ class Boost < Formula
     # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
     # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
     if build.cxx11?
-      args << "cxxflags=-std=c++11"
-      if ENV.compiler == :clang
-        args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
-      end
-    elsif
       args << "cxxflags=-std=c++14"
       if ENV.compiler == :clang
         args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
